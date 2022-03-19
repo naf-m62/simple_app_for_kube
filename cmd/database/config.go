@@ -1,4 +1,4 @@
-package sqlstore
+package database
 
 type Config struct {
 	Host     string `yaml:"addr"`
