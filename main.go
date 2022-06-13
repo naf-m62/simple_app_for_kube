@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v2"
 
@@ -15,7 +16,7 @@ import (
 
 func main() {
 	var configPath string
-	flag.StringVar(&configPath, "c", "cfg/config.yaml", "path to config file")
+	flag.StringVar(&configPath, "c", "config.yaml", "path to config file")
 	flag.Parse()
 
 	var config = new(apiserver.Config)
@@ -28,16 +29,23 @@ func main() {
 		log.Fatal("Unmarshal error:", err)
 	}
 
+	var pgHost = os.Getenv("POSTGRES_HOST")
+	if pgHost != "" {
+		config.Db.Host = pgHost
+		log.Println("PG HOST:", config.Db.Host)
+	}
+
 	var db *sql.DB
 	if db, err = connDB(config.Db); err != nil {
 		log.Fatal("connection to db failed, error:", err)
 	}
+	log.Println("DB connected, host:", config.Db.Host)
 
 	apiserver.Start(config, db)
 }
 
 func connDB(config *database.Config) (db *sql.DB, err error) {
-	var dsn = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", config.Username, config.Password, config.DBName)
+	var dsn = fmt.Sprintf("host = %s user=%s password=%s dbname=%s sslmode=disable", config.Host, config.Username, config.Password, config.DBName)
 
 	if db, err = sql.Open("postgres", dsn); err != nil {
 		return nil, err

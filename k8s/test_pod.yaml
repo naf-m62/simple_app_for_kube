@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-pod
+  namespace: default
+spec:
+  containers:
+    - name: simple-app
+      image: simple_app_for_kube:v1.0.0
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 11101
+
+
+# use local docker image
+# eval $(minikube docker-env)
+# docker ps - now have to show containers inside minikube
+# docker build --tag simple_app_for_kube:v1.0.0 . - again build image
+# set image: simple_app_for_kube:v1.0.0 and imagePullPolicy: Never
+# kubectl apply -f ./k8s/test_pod.yaml
+# https://stackoverflow.com/questions/42564058/how-to-use-local-docker-images-with-minikube#

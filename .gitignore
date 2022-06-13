@@ -1,3 +1,5 @@
 /simple_app_for_kube
 
 .idea
+/postgres-data/
+/vendor/

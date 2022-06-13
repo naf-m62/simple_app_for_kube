@@ -33,7 +33,6 @@ func Start(config *Config, db *sql.DB) {
 			log.Println("server error happened", err)
 			return
 		}
-		log.Println("server started")
 	}()
 
 	var stop = make(chan os.Signal)

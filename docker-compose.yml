@@ -1,0 +1,32 @@
+version: '3.3'
+services:
+  postgres:
+    image: postgres:12-alpine
+    volumes:
+      - ./tmp:/tmp
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      simple-network:
+        ipv4_address: 172.45.0.3 # same POSTGRES_HOST
+
+  app:
+    image: simple_app_for_kube:v1.0.0
+    volumes:
+      - ./tmp:/tmp
+    ports:
+      - "11101:11101"
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: 172.45.0.3 # same ipv4_address of postgres
+    networks:
+      simple-network:
+        ipv4_address: 172.45.0.180
+
+networks:
+  simple-network:
+    ipam:
+      config:
+        - subnet: 172.45.0.0/24

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-simple-deployment
+  namespace: default
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-simple-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-simple-app
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-simple-app
+          image: {{ .Values.image.repository }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.deployment.container.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-simple-service
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: {{ .Release.Name }}-simple-app
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      nodePort: {{ .Values.service.nodePort }}
