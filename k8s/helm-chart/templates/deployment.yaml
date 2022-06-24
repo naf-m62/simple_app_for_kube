@@ -26,10 +26,11 @@ metadata:
   name: {{ .Release.Name }}-simple-service
   namespace: default
 spec:
-  type: NodePort
+  # type: NodePort  # without istio
+  type: ClusterIP # with istio
   selector:
     app: {{ .Release.Name }}-simple-app
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}
-      nodePort: {{ .Values.service.nodePort }}
+{{/*      nodePort: {{ .Values.service.nodePort }} # without istio*/}}

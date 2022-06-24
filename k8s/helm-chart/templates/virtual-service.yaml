@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-simple-ingress
+spec:
+  hosts:
+    - "simple-app.org"
+  gateways:
+    - {{ .Release.Name }}-simple-gateway
+  http:
+  - match:
+      - uri:
+          exact: "/users"
+    route:
+      - destination:
+          host: {{ .Release.Name }}-simple-service
+          port:
+            number: {{ .Values.service.port }}

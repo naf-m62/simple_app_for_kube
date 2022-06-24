@@ -73,3 +73,75 @@ Set replica count by --set parameters
 ```
 $ helm install simple-app ./k8s/helm-chart/ --set replicaCount=3
 ```
+
+### Access by domain
+Useful information: https://medium.com/@emirmujic/istio-and-metallb-on-minikube-242281b1134b
+
+#### Add istio
+```
+istioctl install --set profile=demo -y
+```
+Vertify install
+```
+istioctl verify-install -f ~/istio-1.14.0/manifests/profiles/demo.yaml
+```
+Set label istio-injection
+```
+kubectl label namespace default istio-injection=enabled
+```
+
+Check
+```
+istioctl analyze
+Warning [IST0103] (Pod default/simple-app-simple-deployment-854c8b84f9-5bxg5) The pod default/simple-app-simple-deployment-854c8b84f9-5bxg5 is missing the Istio proxy. This can often be resolved by restarting or redeploying the workload.
+```
+
+Restart deployment and analyze again
+```
+kubectl rollout restart deployment simple-app-simple-deployment
+```
+No warnings more
+
+- Add gateway and virtual service (look gateway.yaml and virtual-service.yaml)
+- Change service type to ClusterIP and comment field nodePort in template (look deployment.yaml)
+```
+$ helm upgrade simple-app ./k8s/helm-chart/
+```
+
+Check virtual services
+```
+$ kubectl get virtualservices
+```
+
+#### Install MetalLB
+```
+$ kubectl create namespace metallb-system
+$ kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.12.1/manifests/metallb.yaml
+```
+Create configMap for metalLB(look config-map.yaml) and upgrade
+```
+$ minikube ip
+192.168.59.100
+
+$ helm upgrade simple-app ./k8s/helm-chart/
+```
+
+Check externalIp for service istio-ingressgateway 
+```
+$ kubectl get svc/istio-ingressgateway -n istio-system
+istio-ingressgateway   LoadBalancer   10.98.2.241   192.168.59.97 
+```
+
+#### Get externalIP and add host to /ets/hosts/ 
+In my case: 192.168.59.97 simple-app.org
+```
+$ sudo vi /etc/hosts
+```
+
+Send requests
+```
+$ curl --location --request GET 'simple-app.org/users?userId=6'
+"na1d2me"
+$ curl --location --request POST 'simple-app.org/users' --header 'Content-Type: application/json' --data-raw '{"name":"Test"}'
+11
+```
